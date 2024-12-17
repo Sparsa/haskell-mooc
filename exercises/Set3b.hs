@@ -128,11 +128,14 @@ sorted (x : xs : xss) = if x <= xs then sorted (xs : xss) else False
 --
 -- Use pattern matching and recursion (and the list constructors : and [])
 
- sumsOf :: [Int] -> [Int]
- -- sumsOf [] =[]
- sumsOf (x : xs) = acc : sumsOf xs where
-  acc = acc + x
--- sumOfAcc (x:xs) acc =
+sumsOf :: [Int] -> [Int]
+sumsOf [] = []
+sumsOf [x] = [x]
+sumsOf (x : xs) = sumOfAcc (x : xs) 0
+
+sumOfAcc [] _ = []
+sumOfAcc (x : []) acc = [acc + x]
+sumOfAcc (x : xs) acc = (acc + x) : sumOfAcc xs (acc + x)
 
 ------------------------------------------------------------------------------
 -- Ex 7: implement the function merge that merges two sorted lists of
@@ -150,8 +153,8 @@ merge [] xs = xs
 merge xs [] = xs
 merge (x : xs) (y : ys) =
   if x <= y
-    then x : y : (merge xs ys)
-    else y : x : (merge xs ys)
+    then x : (merge xs (y : ys))
+    else y : (merge (x : xs) ys)
 
 ------------------------------------------------------------------------------
 -- Ex 8: compute the biggest element, using a comparison function
@@ -179,9 +182,11 @@ merge (x : xs) (y : ys) =
 --     ==> ("Mouse",8)
 
 mymaximum :: (a -> a -> Bool) -> a -> [a] -> a
-mymaximum bigger initial (x:xs) = if (bigger initial x)
-                                  then mymaximum bigger initial xs
-                                  else mymaximum bigger x xs
+mymaximum _ initial [] = initial
+mymaximum bigger initial (x : xs) =
+  if (bigger initial x)
+    then mymaximum bigger initial xs
+    else mymaximum bigger x xs
 
 ------------------------------------------------------------------------------
 -- Ex 9: define a version of map that takes a two-argument function
@@ -197,7 +202,7 @@ mymaximum bigger initial (x:xs) = if (bigger initial x)
 map2 :: (a -> b -> c) -> [a] -> [b] -> [c]
 map2 f [] _ = []
 map2 f _ [] = []
-map2 f (a:as) (b:bs) = (f a b) : map2 f as bs
+map2 f (a : as) (b : bs) = (f a b) : map2 f as bs
 
 ------------------------------------------------------------------------------
 -- Ex 10: implement the function maybeMap, which works a bit like a
@@ -222,6 +227,6 @@ map2 f (a:as) (b:bs) = (f a b) : map2 f as bs
 
 maybeMap :: (a -> Maybe b) -> [a] -> [b]
 maybeMap f [] = []
-maybeMap f x:xs = case f x of
+maybeMap f (x : xs) = case f x of
   Just y -> y : maybeMap f xs
   Nothing -> maybeMap f xs
