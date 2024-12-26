@@ -80,7 +80,10 @@ palindromeHalfs xs = map firstHalf (filter palindrome xs)
 
 firstHalf xs = take (div (length xs + 1) 2) xs
 
-palindrome xs = if y == 0 || y == 1 then True else palindrome (tail (take (y - 1) xs))
+palindrome xs
+  | y == 0 || y == 1 = True
+  | head xs == head (tail (take (y - 1) xs)) = palindrome (tail (take (y - 1) xs))
+  | otherwise = False
   where
     y = length xs
 
@@ -117,7 +120,7 @@ capitalize xs = unwords (map (\s -> (toUpper (head s) : tail s)) (words xs))
 --   * the function takeWhile
 
 powers :: Int -> Int -> [Int]
-powers k max = takeWhile (< max) (map (k ^) [0, 1 ..])
+powers k max = takeWhile (<= max) (map (k ^) [1, 2 ..])
 
 ------------------------------------------------------------------------------
 -- Ex 7: implement a functional while loop. While should be a function
@@ -160,7 +163,11 @@ while check update value = if check value then while check update (update value)
 -- Hint! Remember the case-of expression from lecture 2.
 
 whileRight :: (a -> Either b a) -> a -> b
-whileRight check x = todo
+whileRight check x =
+  let out = (check x)
+   in case out of
+        Left y -> y
+        Right y' -> whileRight check y'
 
 -- for the whileRight examples:
 -- step k x doubles x if it's less than k
