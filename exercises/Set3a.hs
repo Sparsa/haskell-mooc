@@ -120,7 +120,7 @@ capitalize xs = unwords (map (\s -> (toUpper (head s) : tail s)) (words xs))
 --   * the function takeWhile
 
 powers :: Int -> Int -> [Int]
-powers k max = takeWhile (<= max) (map (k ^) [1, 2 ..])
+powers k max = takeWhile (<= max) (map (k ^) [0, 1 ..])
 
 ------------------------------------------------------------------------------
 -- Ex 7: implement a functional while loop. While should be a function
@@ -191,7 +191,7 @@ bomb x = Right (x - 1)
 -- Hint! This is a great use for list comprehensions
 
 joinToLength :: Int -> [String] -> [String]
-joinToLength = todo
+joinToLength n ws = [i ++ j | i <- ws, j <- ws, (length i) + (length j) == n]
 
 ------------------------------------------------------------------------------
 -- Ex 10: implement the operator +|+ that returns a list with the first
@@ -204,6 +204,11 @@ joinToLength = todo
 --   [1,2,3] +|+ [4,5,6]  ==> [1,4]
 --   [] +|+ [True]        ==> [True]
 --   [] +|+ []            ==> []
+(+|+) :: [a] -> [a] -> [a]
+[] +|+ [] = []
+[] +|+ (x : _) = [x]
+(x : _) +|+ [] = [x]
+(x : _) +|+ (y : _) = [x, y]
 
 ------------------------------------------------------------------------------
 -- Ex 11: remember the lectureParticipants example from Lecture 2? We
@@ -220,7 +225,11 @@ joinToLength = todo
 --   sumRights [Left "bad!", Left "missing"]         ==>  0
 
 sumRights :: [Either a Int] -> Int
-sumRights = todo
+sumRights xs = sum (map removeEither xs)
+  where
+    removeEither y = case y of
+      Left _ -> 0
+      Right x -> x
 
 ------------------------------------------------------------------------------
 -- Ex 12: recall the binary function composition operation
@@ -236,7 +245,7 @@ sumRights = todo
 --   multiCompose [(3*), (2^), (+1)] 0 ==> 6
 --   multiCompose [(+1), (2^), (3*)] 0 ==> 2
 
-multiCompose fs = todo
+multiCompose fs x = todo
 
 ------------------------------------------------------------------------------
 -- Ex 13: let's consider another way to compose multiple functions. Given
