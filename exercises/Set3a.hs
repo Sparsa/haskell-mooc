@@ -83,7 +83,7 @@ firstHalf xs = take (div (length xs + 1) 2) xs
 
 palindrome xs
   | y == 0 || y == 1 = True
-  | head xs == head (tail (take (y - 1) xs)) = palindrome (tail (take (y - 1) xs))
+  | head xs == last xs = palindrome (tail (take (y - 1) xs))
   | otherwise = False
   where
     y = length xs
