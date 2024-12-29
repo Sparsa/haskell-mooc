@@ -2,6 +2,7 @@
 --
 --  * lists
 --  * functional programming
+{-# LANGUAGE BlockArguments #-}
 
 module Set3a where
 
@@ -245,7 +246,9 @@ sumRights xs = sum (map removeEither xs)
 --   multiCompose [(3*), (2^), (+1)] 0 ==> 6
 --   multiCompose [(+1), (2^), (3*)] 0 ==> 2
 
-multiCompose fs x = todo
+multiCompose fs x = case fs of
+  [] -> x
+  (y : xs) -> y (multiCompose xs x)
 
 ------------------------------------------------------------------------------
 -- Ex 13: let's consider another way to compose multiple functions. Given
@@ -265,8 +268,11 @@ multiCompose fs x = todo
 --   multiApp concat [take 3, reverse] "race" ==> "racecar"
 --   multiApp id [head, (!!2), last] "axbxc" ==> ['a','b','c'] i.e. "abc"
 --   multiApp sum [head, (!!2), last] [1,9,2,9,3] ==> 6
-
-multiApp = todo
+-- multiApp :: (b -> c) -> [a -> b] -> a -> [c]
+-- The following implementation applies the f on individual applictions of the functions unlike the expteded
+-- multiApp f xs v = [fn v | fn <- fxs] where fxs = map (f .) xs
+multiApp :: ([a] -> b) -> [c -> a] -> c -> b
+multiApp f xs v = f [fn v | fn <- xs]
 
 ------------------------------------------------------------------------------
 -- Ex 14: in this exercise you get to implement an interpreter for a
@@ -301,4 +307,20 @@ multiApp = todo
 -- function, the surprise won't work. See section 3.8 in the material.
 
 interpreter :: [String] -> [String]
-interpreter commands = todo
+interpreter commands = implement (0, 0) commands
+  where
+    implement (x, y) commands = case commands of
+      [] -> []
+      (z : zs) ->
+        if z == "printX"
+          then show x : implement (x, y) zs
+          else
+            if z == "printY"
+              then show y : implement (x, y) zs
+              else implement (implements (x, y) z) zs
+        where
+          implements (x, y) z = case z of
+            "up" -> (x, y + 1)
+            "down" -> (x, y - 1)
+            "right" -> (x + 1, y)
+            "left" -> (x - 1, y)
