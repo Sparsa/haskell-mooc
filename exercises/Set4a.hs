@@ -74,8 +74,8 @@ distinct xs = case xs of
 --   middle 'b' 'a' 'c'  ==> 'b'
 --   middle 1 7 3        ==> 3
 
-middle = todo
-
+middle :: Ord a=> a -> a ->a -> a
+middle x y z = sort [x,y,z] !! 1
 ------------------------------------------------------------------------------
 -- Ex 4: return the range of an input list, that is, the difference
 -- between the smallest and the largest element.
