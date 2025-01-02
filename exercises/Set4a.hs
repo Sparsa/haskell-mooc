@@ -16,11 +16,11 @@
 
 module Set4a where
 
-import Mooc.Todo
-import Data.List
-import Data.Ord
-import qualified Data.Map as Map
 import Data.Array
+import Data.List
+import qualified Data.Map as Map
+import Data.Ord
+import Mooc.Todo
 
 ------------------------------------------------------------------------------
 -- Ex 1: implement the function allEqual which returns True if all
@@ -35,7 +35,14 @@ import Data.Array
 -- you remove the Eq a => constraint from the type!
 
 allEqual :: Eq a => [a] -> Bool
-allEqual xs = todo
+allEqual xs = case xs of
+  [] -> True
+  [x] -> True
+  (x : xs) -> allEq x xs
+    where
+      allEq x  xs = case xs of 
+        [y] ->  x == y
+        (y:ys) -> if x == y then allEq x ys else False
 
 ------------------------------------------------------------------------------
 -- Ex 2: implement the function distinct which returns True if all
@@ -50,9 +57,13 @@ allEqual xs = todo
 --   distinct [1,2] ==> True
 
 distinct :: Eq a => [a] -> Bool
-distinct = todo
+distinct xs = case xs of 
+  [] -> True
+  (y:ys) -> if (foldr f True ys) then  distinct ys else False where
+    f = \x xy -> (y/=x)&&xy
+ 
+  ------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
 -- Ex 3: implement the function middle that returns the middle value
 -- (not the smallest or the largest) out of its three arguments.
 --
@@ -113,7 +124,7 @@ longest = todo
 --   incrementKey True [(True,1),(False,3),(True,4)] ==> [(True,2),(False,3),(True,5)]
 --   incrementKey 'a' [('a',3.4)] ==> [('a',4.4)]
 
-incrementKey :: k -> [(k,v)] -> [(k,v)]
+incrementKey :: k -> [(k, v)] -> [(k, v)]
 incrementKey = todo
 
 ------------------------------------------------------------------------------
@@ -171,10 +182,15 @@ freqs xs = todo
 -- to another.
 --
 -- However, the function should not perform the transfer if
+
 -- * the from account doesn't exist,
+
 -- * the to account doesn't exist,
+
 -- * the sum is negative,
+
 -- * or the from account doesn't have enough money.
+
 --
 -- Hint: there are many ways to implement this logic. Map.member or
 -- Map.notMember might help.
