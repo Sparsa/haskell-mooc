@@ -89,8 +89,8 @@ middle x y z = sort [x,y,z] !! 1
 --   rangeOf [4,2,1,3]          ==> 3
 --   rangeOf [1.5,1.0,1.1,1.2]  ==> 0.5
 
-rangeOf :: [a] -> a
-rangeOf = todo
+rangeOf ::Ord a=>Num a => [a] -> a
+rangeOf xs = (last xss) - (head xss) where xss = sort xs 
 
 ------------------------------------------------------------------------------
 -- Ex 5: given a (non-empty) list of (non-empty) lists, return the longest
@@ -107,8 +107,14 @@ rangeOf = todo
 -- Examples:
 --   longest [[1,2,3],[4,5],[6]] ==> [1,2,3]
 --   longest ["bcd","def","ab"] ==> "bcd"
-
-longest = todo
+compareList :: Ord a => [a] ->[a] ->Ordering 
+compareList xs ys = if lxs < lys then LT 
+                    else if lxs > lys then GT
+                    else if head xs <= head ys then GT else LT where
+                    lxs = length xs 
+                    lys = length ys
+longest :: Ord a => [[a]] -> [a]
+longest xs = last (sortBy compareList xs)
 
 ------------------------------------------------------------------------------
 -- Ex 6: Implement the function incrementKey, that takes a list of
