@@ -130,8 +130,9 @@ longest xs = last (sortBy compareList xs)
 --   incrementKey True [(True,1),(False,3),(True,4)] ==> [(True,2),(False,3),(True,5)]
 --   incrementKey 'a' [('a',3.4)] ==> [('a',4.4)]
 
-incrementKey :: k -> [(k, v)] -> [(k, v)]
-incrementKey = todo
+incrementKey ::Eq k => Num v =>  k -> [(k, v)] -> [(k, v)]
+incrementKey key xs = map (increment key) xs where
+  increment k p = if (fst p) == k then (k, (snd p) + 1) else p 
 
 ------------------------------------------------------------------------------
 -- Ex 7: compute the average of a list of values of the Fractional
@@ -146,7 +147,7 @@ incrementKey = todo
 -- length to a Fractional
 
 average :: Fractional a => [a] -> a
-average xs = todo
+average xs = (foldr (+) 0 xs)/(fromIntegral (length xs))
 
 ------------------------------------------------------------------------------
 -- Ex 8: given a map from player name to score and two players, return
@@ -165,8 +166,7 @@ average xs = todo
 --     ==> "Lisa"
 
 winner :: Map.Map String Int -> String -> String -> String
-winner scores player1 player2 = todo
-
+winner scores player1 player2 =  if (Map.findWithDefault 0 player1 scores) >= (Map.findWithDefault 0 player2 scores) then player1 else player2
 ------------------------------------------------------------------------------
 -- Ex 9: compute how many times each value in the list occurs. Return
 -- the frequencies as a Map from value to Int.
@@ -180,7 +180,10 @@ winner scores player1 player2 = todo
 --     ==> Map.fromList [(False,3),(True,1)]
 
 freqs :: (Eq a, Ord a) => [a] -> Map.Map a Int
-freqs xs = todo
+freqs xs = foldr count Map.empty xs where 
+  count x map = case Map.lookup x map of
+    Nothing -> Map.insert x 1 map 
+    Just y -> Map.insert x (y+1) map
 
 ------------------------------------------------------------------------------
 -- Ex 10: recall the withdraw example from the course material. Write a
@@ -213,7 +216,14 @@ freqs xs = todo
 --     ==> fromList [("Bob",100),("Mike",50)]
 
 transfer :: String -> String -> Int -> Map.Map String Int -> Map.Map String Int
-transfer from to amount bank = todo
+transfer from to amount bank = if Map.member from bank && Map.member to bank &&  fromLookup >= amount && amount > 0 then
+                              Map.insert to (toLookup + amount) (Map.insert from (fromLookup-amount) bank) else bank where
+                              toLookup = (case Map.lookup to bank of 
+                                Nothing -> 0
+                                Just y -> y)
+                              fromLookup = (case Map.lookup  from bank of
+                                Nothing -> 0
+                                Just y' -> y')
 
 ------------------------------------------------------------------------------
 -- Ex 11: given an Array and two indices, swap the elements in the indices.
@@ -223,8 +233,7 @@ transfer from to amount bank = todo
 --         ==> array (1,4) [(1,"one"),(2,"three"),(3,"two"),(4,"four")]
 
 swap :: Ix i => i -> i -> Array i a -> Array i a
-swap i j arr = todo
-
+swap i j arr =  arr // [(i,arr!j),(j,arr!i)]
 ------------------------------------------------------------------------------
 -- Ex 12: given an Array, find the index of the largest element. You
 -- can assume the Array isn't empty.
@@ -234,4 +243,8 @@ swap i j arr = todo
 -- Hint: check out Data.Array.indices or Data.Array.assocs
 
 maxIndex :: (Ix i, Ord a) => Array i a -> i
-maxIndex = todo
+maxIndex array = fst (foldr maxpair headpair tailarray) where
+              maxpair p1 p2 = if snd p1 >= snd p2 then p1 else p2
+              headpair = head arrayAssoc
+              tailarray = tail arrayAssoc
+              arrayAssoc = Data.Array.assocs array
