@@ -1,7 +1,7 @@
 -- Exercise set 5a
 --
--- * defining algebraic datatypes
--- * recursive datatypes
+-- \* defining algebraic datatypes
+-- \* recursive datatypes
 
 module Set5a where
 
@@ -12,7 +12,7 @@ import Mooc.Todo
 -- Bus, Tram and Train.
 --
 -- The constructors don't need any fields.
-
+data Vehicle = Bike | Bus | Tram | Train
 
 ------------------------------------------------------------------------------
 -- Ex 2: Define the type BusTicket that can represent values like these:
@@ -20,6 +20,7 @@ import Mooc.Todo
 --  - MonthlyTicket "January"
 --  - MonthlyTicket "December"
 
+data BusTicket = SingleTicket | MonthlyTicket String
 
 ------------------------------------------------------------------------------
 -- Ex 3: Here's the definition for a datatype ShoppingEntry that
@@ -30,7 +31,7 @@ import Mooc.Todo
 -- Implement the functions totalPrice and buyOneMore below.
 
 data ShoppingEntry = MkShoppingEntry String Double Int
-  deriving Show
+  deriving (Show)
 
 threeApples :: ShoppingEntry
 threeApples = MkShoppingEntry "Apple" 0.5 3
@@ -48,7 +49,7 @@ twoBananas = MkShoppingEntry "Banana" 1.1 2
 --   totalPrice twoBananas   ==> 2.2
 
 totalPrice :: ShoppingEntry -> Double
-totalPrice = todo
+totalPrice (MkShoppingEntry name price number) = price * fromIntegral number
 
 -- buyOneMore should increment the count in an entry by one
 --
@@ -56,7 +57,7 @@ totalPrice = todo
 --   buyOneMore twoBananas    ==> MkShoppingEntry "Banana" 1.1 3
 
 buyOneMore :: ShoppingEntry -> ShoppingEntry
-buyOneMore = todo
+buyOneMore (MkShoppingEntry name price number) = MkShoppingEntry name price (number + 1)
 
 ------------------------------------------------------------------------------
 -- Ex 4: define a datatype Person, which should contain the age (an
@@ -65,28 +66,28 @@ buyOneMore = todo
 -- Also define a Person value fred, and the functions getAge, getName,
 -- setAge and setName (see below).
 
-data Person = PersonUndefined
-  deriving Show
+data Person = NewPerson Int String
+  deriving (Show)
 
 -- fred is a person whose name is Fred and age is 90
 fred :: Person
-fred = todo
+fred = NewPerson 90 "Fred"
 
 -- getName returns the name of the person
 getName :: Person -> String
-getName p = todo
+getName (NewPerson age name) = name
 
 -- getAge returns the age of the person
 getAge :: Person -> Int
-getAge p = todo
+getAge (NewPerson age name) = age
 
 -- setName takes a person and returns a new person with the name changed
 setName :: String -> Person -> Person
-setName name p = todo
+setName name (NewPerson age n) = NewPerson age name
 
 -- setAge does likewise for age
 setAge :: Int -> Person -> Person
-setAge age p = todo
+setAge age (NewPerson a name) = NewPerson age name
 
 ------------------------------------------------------------------------------
 -- Ex 5: define a datatype Position which contains two Int values, x
@@ -123,7 +124,7 @@ right = todo
 -- either be a freshman, a nth year student, or graduated.
 
 data Student = Freshman | NthYear Int | Graduated
-  deriving (Show,Eq)
+  deriving (Show, Eq)
 
 -- Implement the function study, which changes a Freshman into a 1st
 -- year student, a 1st year student into a 2nd year student, and so
@@ -195,7 +196,7 @@ toggle ud = todo
 -- rgb (Mix (Invert Red) (Invert Green))  ==> [0.5,0.5,1]
 
 data Color = Red | Green | Blue | Mix Color Color | Invert Color
-  deriving Show
+  deriving (Show)
 
 rgb :: Color -> [Double]
 rgb col = todo
@@ -207,7 +208,6 @@ rgb col = todo
 -- Examples:
 --   One True         ::  OneOrTwo Bool
 --   Two "cat" "dog"  ::  OneOrTwo String
-
 
 ------------------------------------------------------------------------------
 -- Ex 10: define a recursive datatype KeyVals for storing a set of
@@ -229,12 +229,12 @@ rgb col = todo
 -- KeyVals and lists of pairs.
 
 data KeyVals k v = KeyValsUndefined
-  deriving Show
+  deriving (Show)
 
-toList :: KeyVals k v -> [(k,v)]
+toList :: KeyVals k v -> [(k, v)]
 toList = todo
 
-fromList :: [(k,v)] -> KeyVals k v
+fromList :: [(k, v)] -> KeyVals k v
 fromList = todo
 
 ------------------------------------------------------------------------------
@@ -249,7 +249,7 @@ fromList = todo
 --
 
 data Nat = Zero | PlusOne Nat
-  deriving (Show,Eq)
+  deriving (Show, Eq)
 
 fromNat :: Nat -> Int
 fromNat n = todo
@@ -310,7 +310,7 @@ data Bin = End | O Bin | I Bin
 
 -- This function increments a binary number by one.
 inc :: Bin -> Bin
-inc End   = I End
+inc End = I End
 inc (O b) = I b
 inc (I b) = O (inc b)
 
