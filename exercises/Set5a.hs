@@ -97,27 +97,27 @@ setAge age (NewPerson a name) = NewPerson age name
 --   getY (up (up origin))    ==> 2
 --   getX (up (right origin)) ==> 1
 
-data Position = PositionUndefined
+data Position = Pos Int Int
 
 -- origin is a Position value with x and y set to 0
 origin :: Position
-origin = todo
+origin = Pos 0 0
 
 -- getX returns the x of a Position
 getX :: Position -> Int
-getX = todo
+getX (Pos x _) = x
 
 -- getY returns the y of a position
 getY :: Position -> Int
-getY = todo
+getY (Pos x y) = y
 
 -- up increases the y value of a position by one
 up :: Position -> Position
-up = todo
+up (Pos x y) = Pos x (y + 1)
 
 -- right increases the x value of a position by one
 right :: Position -> Position
-right = todo
+right (Pos x y) = Pos (x + 1) y
 
 ------------------------------------------------------------------------------
 -- Ex 6: Here's a datatype that represents a student. A student can
@@ -132,7 +132,11 @@ data Student = Freshman | NthYear Int | Graduated
 -- graduated student stays graduated even if he studies.
 
 study :: Student -> Student
-study = todo
+study st = case st of
+  Freshman -> NthYear 1
+  NthYear 7 -> Graduated
+  Graduated -> Graduated
+  NthYear n -> NthYear (n + 1)
 
 ------------------------------------------------------------------------------
 -- Ex 7: define a datatype UpDown that represents a counter that can
@@ -151,25 +155,31 @@ study = todo
 -- get (tick (tick (toggle (tick zero))))
 --   ==> -1
 
-data UpDown = UpDownUndefined1 | UpDownUndefined2
+data UpDown = Up Int | Down Int
 
 -- zero is an increasing counter with value 0
 zero :: UpDown
-zero = todo
+zero = Up 0
 
 -- get returns the counter value
 get :: UpDown -> Int
-get ud = todo
+get ud = case ud of
+  Up a -> a
+  Down a -> a
 
 -- tick increases an increasing counter by one or decreases a
 -- decreasing counter by one
 tick :: UpDown -> UpDown
-tick ud = todo
+tick ud = case ud of
+  Up a -> Up (a + 1)
+  Down a -> Down (a - 1)
 
 -- toggle changes an increasing counter into a decreasing counter and
 -- vice versa
 toggle :: UpDown -> UpDown
-toggle ud = todo
+toggle ud = case ud of
+  Up a -> Down a
+  Down a -> Up a
 
 ------------------------------------------------------------------------------
 -- Ex 8: you'll find a Color datatype below. It has the three basic
@@ -199,7 +209,15 @@ data Color = Red | Green | Blue | Mix Color Color | Invert Color
   deriving (Show)
 
 rgb :: Color -> [Double]
-rgb col = todo
+rgb col = case col of
+  Red -> [1, 0, 0]
+  Green -> [0, 1, 0]
+  Blue -> [0, 0, 1]
+  Mix a b -> map (/ 2) (addList (rgb a) (rgb b))
+    where
+      addList [] [] = []
+      addList (x : xs) (y : ys) = (x + y) : (addList xs ys)
+  Invert a -> map (\x -> 1.0 - x) (rgb a)
 
 ------------------------------------------------------------------------------
 -- Ex 9: define a parameterized datatype OneOrTwo that contains one or
@@ -208,6 +226,7 @@ rgb col = todo
 -- Examples:
 --   One True         ::  OneOrTwo Bool
 --   Two "cat" "dog"  ::  OneOrTwo String
+data OneOrTwo a = One a | Two a a
 
 ------------------------------------------------------------------------------
 -- Ex 10: define a recursive datatype KeyVals for storing a set of
@@ -228,14 +247,18 @@ rgb col = todo
 -- Also define the functions toList and fromList that convert between
 -- KeyVals and lists of pairs.
 
-data KeyVals k v = KeyValsUndefined
+data KeyVals k v = Empty | Pair k v (KeyVals k v)
   deriving (Show)
 
 toList :: KeyVals k v -> [(k, v)]
-toList = todo
+toList kv = case kv of
+  Empty -> []
+  Pair a b kv -> (a, b) : (toList kv)
 
 fromList :: [(k, v)] -> KeyVals k v
-fromList = todo
+fromList xs = case xs of
+  [] -> Empty
+  (x : xs) -> Pair (fst x) (snd x) (fromList xs)
 
 ------------------------------------------------------------------------------
 -- Ex 11: The data type Nat is the so called Peano
@@ -252,10 +275,20 @@ data Nat = Zero | PlusOne Nat
   deriving (Show, Eq)
 
 fromNat :: Nat -> Int
-fromNat n = todo
+fromNat n = case n of
+  Zero -> 0
+  PlusOne x -> 1 + fromNat x
 
 toNat :: Int -> Maybe Nat
-toNat z = todo
+toNat z =
+  if z >= 0
+    then case z of
+      0 -> Just Zero
+      n -> Just (PlusOne (toNat' (n - 1)))
+        where
+          toNat' 0 = Zero
+          toNat' n = PlusOne (toNat' (n - 1))
+    else Nothing
 
 ------------------------------------------------------------------------------
 -- Ex 12: While pleasingly simple in its definition, the Nat datatype is not
@@ -315,10 +348,20 @@ inc (O b) = I b
 inc (I b) = O (inc b)
 
 prettyPrint :: Bin -> String
-prettyPrint = todo
+prettyPrint b = case b of
+  End -> ""
+  O rest -> prettyPrint rest ++ "0"
+  I rest -> prettyPrint rest ++ "1"
 
 fromBin :: Bin -> Int
-fromBin = todo
+fromBin b = case b of
+  O End -> 0
+  I End -> 1
+  O rest -> (fromBin rest) * 2
+  I rest -> (fromBin rest) * 2 + 1
 
 toBin :: Int -> Bin
-toBin = todo
+toBin i = case i of
+  0 -> O End
+  1 -> I End
+  n -> if (mod n 2) == 1 then I (toBin (div n 2)) else O (toBin (div n 2))
