@@ -176,7 +176,20 @@ cull val tree = case tree of
 --                     (Node 3 Empty Empty))   ==>   True
 
 isOrdered :: Ord a => Tree a -> Bool
-isOrdered = todo
+isOrdered t = case t of
+  Empty -> True
+  Node v l r -> case (l, r) of
+    (Empty, Empty) -> True
+    (Empty, _) -> if vr > v then isOrdered r else False
+    (_, Empty) -> if v > vl then isOrdered l else False
+    (_, _) -> if v > vl && vr > v then isOrdered l && isOrdered r else False
+    where
+      vl = case valAtRoot l of
+        Nothing -> v
+        Just v' -> v'
+      vr = case valAtRoot r of
+        Nothing -> v
+        Just v' -> v'
 
 ------------------------------------------------------------------------------
 -- Ex 8: a path in a tree can be represented as a list of steps that
@@ -195,7 +208,13 @@ data Step = StepL | StepR
 --   walk [StepL,StepL] (Node 1 (Node 2 Empty Empty) Empty)  ==>  Nothing
 
 walk :: [Step] -> Tree a -> Maybe a
-walk = todo
+walk steps t = case steps of
+  [] -> valAtRoot t
+  (x : xs) -> case t of
+    Empty -> Nothing
+    Node v l r -> case x of
+      StepL -> walk xs l
+      StepR -> walk xs r
 
 ------------------------------------------------------------------------------
 -- Ex 9: given a tree, a path and a value, set the value at the end of
@@ -216,7 +235,15 @@ walk = todo
 --   set [StepL,StepR] 1 (Node 0 Empty Empty)  ==>  (Node 0 Empty Empty)
 
 set :: [Step] -> a -> Tree a -> Tree a
-set path val tree = todo
+set steps val t = case steps of
+  [] -> case t of
+    Empty -> Empty
+    Node v l r -> Node val l r
+  (x : xs) -> case t of
+    Empty -> Empty
+    Node v l r -> case x of
+      StepL -> Node v (set xs val l) r
+      StepR -> Node v l (set xs val r)
 
 ------------------------------------------------------------------------------
 -- Ex 10: given a value and a tree, return a path that goes from the
@@ -232,4 +259,14 @@ set path val tree = todo
 --                    (Node 5 Empty Empty))                     ==>  Just [StepL,StepR]
 
 search :: Eq a => a -> Tree a -> Maybe [Step]
-search = todo
+search val t = case t of
+  Empty -> Nothing
+  Node value _ _ -> if value == val then Just [] else if null lst then Nothing else Just lst
+  where
+    lst = searchM val t []
+    searchM val t lst = case t of
+      Empty -> []
+      Node v l r -> if v == val then lst else if null left then right else left
+        where
+          left = searchM val l lst
+          right = searchM val r lst
