@@ -258,15 +258,44 @@ set steps val t = case steps of
 --                            (Node 1 Empty Empty))
 --                    (Node 5 Empty Empty))                     ==>  Just [StepL,StepR]
 
+-- search :: Eq a => a -> Tree a -> Maybe [Step]
+-- search val t = case t of
+-- Empty -> Nothing
+-- Node value l r ->
+-- if value == val
+-- then Just []
+-- else
+-- if null lst1
+-- then
+-- if null lst2
+-- then Nothing
+-- else Just lst2
+-- else Just lst1
+-- where
+-- lst1 = searchM val l [StepL]
+-- lst2 = searchM val r [StepR]
+-- searchM v t1 lst1 = case t1 of
+-- Empty -> []
+-- Node v1 l r ->
+-- if v1 == v
+-- then lst1
+-- else
+-- if null left
+-- then
+-- if null right
+-- then []
+-- else lst1 ++ right
+-- else lst1 ++ left
+-- where
+-- left = searchM v l [StepL]
+-- right = searchM v r [StepR]
 search :: Eq a => a -> Tree a -> Maybe [Step]
-search val t = case t of
-  Empty -> Nothing
-  Node value _ _ -> if value == val then Just [] else if null lst then Nothing else Just lst
+search val tree = searchM val tree []
   where
-    lst = searchM val t []
-    searchM val t lst = case t of
-      Empty -> []
-      Node v l r -> if v == val then lst else if null left then right else left
-        where
-          left = searchM val l lst
-          right = searchM val r lst
+    searchM v Empty path = Nothing
+    searchM v (Node value l r) path
+      | value == v = Just path
+      | otherwise = case (searchM v l (path ++ [StepL]), searchM v r (path ++ [StepR])) of
+          (Nothing, Nothing) -> Nothing
+          (Just lst, _) -> Just lst
+          (_, Just lst) -> Just lst
