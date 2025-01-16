@@ -128,6 +128,13 @@ instance Price [Maybe Milk] where
 
 data Number = Finite Integer | Infinite
   deriving (Show, Eq)
+instance Ord Number where
+  compare n1 n2 = case (n1,n2) of 
+    (Infinite,Infinite) -> EQ
+    (Infinite,_) -> GT
+    (_,Infinite) -> LT
+    (Finite a,Finite b) -> compare a b
+
 
 ------------------------------------------------------------------------------
 -- Ex 8: rational numbers have a numerator and a denominator that are
@@ -151,9 +158,13 @@ data Number = Finite Integer | Infinite
 
 data RationalNumber = RationalNumber Integer Integer
   deriving (Show)
-
+-- gcd a b = if m == 0 then b else gcd b m where 
+--  m = mod a b
 instance Eq RationalNumber where
-  p == q = todo
+  p == q = case (p,q) of 
+    (RationalNumber a1 b1, RationalNumber a2 b2) -> if (div a1 gcd1)*(div b2 gcd2)  == (div a2 gcd2)*(div b1 gcd1) then True else False where
+      gcd1 = gcd a1 b1
+      gcd2 = gcd a2 b2
 
 ------------------------------------------------------------------------------
 -- Ex 9: implement the function simplify, which simplifies a rational
@@ -173,7 +184,8 @@ instance Eq RationalNumber where
 -- Hint: Remember the function gcd?
 
 simplify :: RationalNumber -> RationalNumber
-simplify p = todo
+simplify (RationalNumber a b) = RationalNumber (div a g) (div b g) where
+  g = gcd a b
 
 ------------------------------------------------------------------------------
 -- Ex 10: implement the typeclass Num for RationalNumber. The results
@@ -194,12 +206,17 @@ simplify p = todo
 --   signum (RationalNumber 0 2)             ==> RationalNumber 0 1
 
 instance Num RationalNumber where
-  p + q = todo
-  p * q = todo
-  abs q = todo
-  signum q = todo
-  fromInteger x = todo
-  negate q = todo
+  p + q = case (p,q) of 
+    (RationalNumber a b, RationalNumber x y) -> simplify (RationalNumber (a*y + b*x) (b*y))
+  p * q = case (p,q) of 
+    (RationalNumber a b, RationalNumber x y) -> simplify (RationalNumber (a*x) (b*y))
+  abs q = case q of 
+    RationalNumber a b -> simplify (RationalNumber (abs a) (abs b))
+  signum q = case q of 
+    RationalNumber a b -> simplify (RationalNumber (signum a) (signum b))
+  fromInteger x = simplify (RationalNumber x 1 )
+  negate q = case q of
+    RationalNumber a b -> simplify (RationalNumber (negate a)  b)
 
 ------------------------------------------------------------------------------
 -- Ex 11: a class for adding things. Define a class Addable with a
@@ -213,7 +230,16 @@ instance Num RationalNumber where
 --   add 1 zero             ==>  1
 --   add [1,2] [3,4]        ==>  [1,2,3,4]
 --   add zero [True,False]  ==>  [True,False]
+class Addable a where 
+  zero :: a
+  add :: a -> a -> a
+instance Addable Integer where 
+  zero = 0
+  add a b = a + b
 
+instance Addable [a] where 
+  zero = []
+  add xs ys = xs ++ ys
 ------------------------------------------------------------------------------
 -- Ex 12: cycling. Implement a type class Cycle that contains a
 -- function `step` that cycles through the values of the type.
@@ -244,3 +270,23 @@ data Color = Red | Green | Blue
 
 data Suit = Club | Spade | Diamond | Heart
   deriving (Show, Eq)
+class Cycle a where 
+  step :: a -> a
+  stepMany :: Int -> a -> a
+  stepMany n a = case n of 
+    0 -> a
+    otherwise -> stepMany (n-1) (step a)
+
+instance Cycle Color where 
+  step a = case a of 
+    Red -> Green
+    Green -> Blue
+    Blue -> Red
+  
+instance Cycle Suit where
+  step a = case a of 
+    Club -> Spade
+    Spade -> Diamond
+    Diamond -> Heart
+    Heart -> Club
+  
