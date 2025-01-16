@@ -81,7 +81,7 @@ instance Eq a => Eq (List a) where
 -- Example:
 --   price ChickenEgg  ==>  20
 class Price a  where
-  price :: a -> String
+  price :: a -> Int 
 data Egg = ChickenEgg | ChocolateEgg
   deriving (Show)
 
@@ -90,12 +90,12 @@ data Milk = Milk Int -- amount in litres
 
 instance Price Egg where 
   price e = case e of 
-    ChickenEgg -> "chicken eggs cost 20"
-    ChocolateEgg -> "chocolate eggs cost 30" 
+    ChickenEgg ->  20
+    ChocolateEgg ->  30 
 instance Price Milk where
-  price m  =  case m of 
-    Milk n -> "milk costs " ++ (show 15*n) " per liter"
-------------------------------------------------------------------------------
+    price m  =  case m of 
+      Milk j ->  j*15
+  ------------------------------------------------------------------------------
 -- Ex 6: define the necessary instance hierarchy in order to be able
 -- to compute these:
 --
@@ -103,7 +103,22 @@ instance Price Milk where
 -- price [Milk 1, Milk 2]  ==> 45
 -- price [Just ChocolateEgg, Nothing, Just ChickenEgg]  ==> 50
 -- price [Nothing, Nothing, Just (Milk 1), Just (Milk 2)]  ==> 45
-
+instance Price ( Maybe Egg) where
+  price e = case e of 
+    Nothing -> 0
+    Just a -> price a
+instance Price (Maybe Milk) where
+  price e = case e of 
+    Nothing -> 0
+    Just a -> price a
+instance Price [Egg] where
+  price xs = sum $ map price xs
+instance Price [Milk] where
+  price xs = sum (map price xs)
+instance Price [Maybe Egg] where
+  price xs = sum (map price xs)
+instance Price [Maybe Milk] where
+  price xs = sum  $ map price xs
 ------------------------------------------------------------------------------
 -- Ex 7: below you'll find the datatype Number, which is either an
 -- Integer, or a special value Infinite.
