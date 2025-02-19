@@ -226,20 +226,39 @@ data Multiply2 = Multiply2 Int Int
 
 class Operation2 op where
   compute2 :: op -> Int
+  show2 :: op -> String
 
 instance Operation2 Add2 where
   compute2 (Add2 i j) = i + j
+  show2 (Add2 i j) = (show i) ++ "+" ++ (show j)
 
 instance Operation2 Subtract2 where
   compute2 (Subtract2 i j) = i - j
+  show2 (Subtract2 i j) = (show i) ++ "-" ++ (show j)
 
 instance Operation2 Multiply2 where
   compute2 (Multiply2 i j) = i * j
+  show2 (Multiply2 i j) = (show i) ++ "*" ++ (show j)
 
-show2 :: Operation2 Multiply2 -> String
-show2 compute2 (Multiply2 i j) = (show i) ++ "*" ++ (show j)
-show2 compute2 (Add2 i j) = (show i) ++ "+" ++ (show j)
-show2 compute2 (Subtract2 i j) = (show i) ++ "+" ++ (show j)
+
+--show2 :: Operation2  -> String
+--show2 operations = case operations of
+--  Multiply2 i j -> (show i) ++ "*" ++ (show j)
+--  Add2 i j -> (show i) ++ "+" ++ (show j)
+--  Subtract2 i j -> (show i) ++ "-" ++ (show j)
+
+
+-- show2:: Multiply2 -> String
+--show2:: Operation2  -> String
+--show2 compute2 (Multiply2 i j) = (show i) ++ "*" ++ (show j)
+--show2:: Operation2 Add2 -> String
+--show2 compute2 (Add2 i j) = (show i) ++ "+" ++ (show j)
+--show2:: Operation2 Subtract2 -> String
+--show2 compute2 (Subtract2 i j) = (show i)++ "-" ++ (show j)
+--show2 :: Operation2 Add2 -> String
+--show2 compute2 (Add2 i j) = (show i) ++ "+" ++ (show j)
+----show2 :: Operation2 Subtract2 -> String
+--show2 compute2 (Subtract2 i j) = (show i) ++ "+" ++ (show j)
 
 
 ------------------------------------------------------------------------------
