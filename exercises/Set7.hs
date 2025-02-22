@@ -288,7 +288,12 @@ data PasswordRequirement
   deriving (Show)
 
 passwordAllowed :: String -> PasswordRequirement -> Bool
-passwordAllowed = todo
+passwordAllowed s req = case req of
+  MinimumLength n -> length s >= n
+  ContainsSome sub -> any (`elem` s) sub
+  DoesNotContain sub -> not (any (`elem` s) sub)
+  And m n -> passwordAllowed s m && passwordAllowed s n
+  Or m n -> passwordAllowed s m || passwordAllowed s n
 
 ------------------------------------------------------------------------------
 -- Ex 10: a DSL for simple arithmetic expressions with addition and
@@ -310,17 +315,32 @@ passwordAllowed = todo
 --     ==> "(3*(1+1))"
 --
 
-data Arithmetic = Todo
+data Arithmetic = Literal Integer | Operation String Arithmetic Arithmetic
   deriving (Show)
 
 literal :: Integer -> Arithmetic
-literal = todo
+literal n  = Literal n
 
 operation :: String -> Arithmetic -> Arithmetic -> Arithmetic
-operation = todo
+operation s a b = Operation s a b
 
 evaluate :: Arithmetic -> Integer
-evaluate = todo
+evaluate  ari = case ari of
+  Literal n -> n
+  Operation "+" a b -> evaluate a +  evaluate b
+  Operation "*" a b -> evaluate a *  evaluate b
 
 render :: Arithmetic -> String
-render = todo
+render ari =
+    case ari of
+ Literal n -> show n
+ Operation "+" a b -> let
+    eva = render a
+    evb = render b
+    in
+   "("++eva++"+"++evb++")"
+ Operation "*" a b -> let
+    eva = render a
+    evb = render b
+    in
+   "("++eva++"*"++evb++")"
