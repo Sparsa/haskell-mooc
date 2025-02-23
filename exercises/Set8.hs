@@ -133,7 +133,10 @@ renderListExample = renderList justADot (9,11) (9,11)
 --      ["000000","000000","000000"]]
 
 dotAndLine :: Picture
-dotAndLine = todo
+dotAndLine = Picture f
+  where f (Coord x y) | x == 3 && y == 4 = white
+                      | y == 8 = pink
+                      | otherwise = black
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -166,11 +169,18 @@ dotAndLine = todo
 --          ["7f0000","7f0000","7f0000"]]
 
 blendColor :: Color -> Color -> Color
-blendColor = todo
-
+blendColor c1 c2 = Color (div (getRed c1 + getRed c2) 2)
+                         (div (getGreen c1 + getGreen c2) 2)
+                         (div (getBlue c1 + getBlue c2) 2)
+blendColorList:: [Color] -> Color
+blendColorList colorlist = Color (div (foldr (\ c i ->   getRed c + i) 0 colorlist) listlen)
+                                 (div (foldr (\c i ->  getGreen c + i) 0 colorlist) listlen)
+                                 (div (foldr (\c i ->   getBlue c + i) 0 colorlist) listlen)
+                           where
+                             listlen = length colorlist
 combine :: (Color -> Color -> Color) -> Picture -> Picture -> Picture
-combine = todo
-
+combine f (Picture p1) (Picture p2)  = Picture g
+  where g (Coord x y) = f ( p1 (Coord x y) ) (p2 (Coord x y))
 ------------------------------------------------------------------------------
 
 -- Let's define blend, we'll use it later
@@ -240,7 +250,8 @@ exampleCircle = fill red (circle 80 100 200)
 --        ["000000","000000","000000","000000","000000","000000"]]
 
 rectangle :: Int -> Int -> Int -> Int -> Shape
-rectangle x0 y0 w h = todo
+rectangle x0 y0 w h = Shape g
+  where g (Coord x y )= x >= x0 && x < x0+w && y >=y0 && y < y0 + h
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -256,10 +267,12 @@ rectangle x0 y0 w h = todo
 -- shape.
 
 union :: Shape -> Shape -> Shape
-union = todo
+union (Shape f) (Shape g) = Shape h
+  where h coord = f coord || g coord
 
 cut :: Shape -> Shape -> Shape
-cut = todo
+cut (Shape f) (Shape g) = Shape h
+  where h coord = f coord &&  not (g coord)
 ------------------------------------------------------------------------------
 
 -- Here's a snowman, built using union from circles and rectangles.
@@ -287,7 +300,10 @@ exampleSnowman = fill white snowman
 --        ["000000","000000","000000"]]
 
 paintSolid :: Color -> Shape -> Picture -> Picture
-paintSolid color shape base = todo
+paintSolid color shape base = Picture g
+  where g coord = if sf coord then color else f coord
+        Picture f = base
+        Shape sf = shape
 ------------------------------------------------------------------------------
 
 allWhite :: Picture
@@ -332,7 +348,13 @@ stripes a b = Picture f
 --       ["000000","000000","000000","000000","000000"]]
 
 paint :: Picture -> Shape -> Picture -> Picture
-paint pat shape base = todo
+paint pat shape base = Picture g
+  where
+    g coord = if (contains  shape x y) then f coord else h coord
+      where
+        Coord x y = coord
+        Picture f = pat
+        Picture h = base
 ------------------------------------------------------------------------------
 
 -- Here's a patterned version of the snowman example. See it by running:
@@ -350,9 +372,20 @@ examplePatterns = (paint (solid black) hat . paint (stripes red yellow) legs . p
 flipCoordXY :: Coord -> Coord
 flipCoordXY (Coord x y) = (Coord y x)
 
+flipCoordX :: Coord -> Coord
+flipCoordX (Coord x y) = (Coord (-x) y)
+
+flipCoordY :: Coord -> Coord
+flipCoordY (Coord x y) = (Coord x (-y))
 -- Flip a picture by switching x and y coordinates
 flipXY :: Picture -> Picture
 flipXY (Picture f) = Picture (f . flipCoordXY)
+
+flipX :: Picture -> Picture
+flipX (Picture f) = Picture (f . flipCoordX)
+
+flipY :: Picture -> Picture
+flipY (Picture f) = Picture (f . flipCoordY)
 
 zoomCoord :: Int -> Coord -> Coord
 zoomCoord z (Coord x y) = Coord (div x z) (div y z)
@@ -395,19 +428,23 @@ xy = Picture f
 data Fill = Fill Color
 
 instance Transform Fill where
-  apply = todo
+  apply (Fill c) p  = Picture g
+    where g _ = c
 
 data Zoom = Zoom Int
   deriving Show
 
 instance Transform Zoom where
-  apply = todo
+  apply (Zoom n) (Picture f) = Picture (f . zoomCoord n)
 
 data Flip = FlipX | FlipY | FlipXY
   deriving Show
 
 instance Transform Flip where
-  apply = todo
+  apply f p  = case f of
+    FlipX -> flipX p
+    FlipY -> flipY p
+    FlipXY -> flipXY p
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -422,8 +459,9 @@ instance Transform Flip where
 data Chain a b = Chain a b
   deriving Show
 
-instance Transform (Chain a b) where
-  apply = todo
+instance  (Transform a, Transform b) => Transform (Chain a b) where
+  apply :: (Transform a, Transform b) => Chain a b -> Picture -> Picture
+  apply (Chain a b) p = apply a (apply b p) -- first apply b then a
 ------------------------------------------------------------------------------
 
 -- Now we can redefine largeVerticalStripes using the above Transforms.
@@ -459,9 +497,12 @@ checkered = flipBlend largeVerticalStripes2
 
 data Blur = Blur
   deriving Show
-
+getNeibour:: Coord -> [Coord]
+getNeibour (Coord x y) = [Coord (x-1) y, Coord (x+1) y, Coord x (y-1), Coord x (y+1)]
 instance Transform Blur where
-  apply = todo
+  apply Blur p = Picture g
+    where g coord = blendColorList (map f  (coord : getNeibour coord))
+          Picture f = p
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -479,7 +520,7 @@ data BlurMany = BlurMany Int
   deriving Show
 
 instance Transform BlurMany where
-  apply = todo
+  apply (BlurMany n) p = if n == 0 then p else apply (BlurMany (n-1)) (apply Blur p)
 ------------------------------------------------------------------------------
 
 -- Here's a blurred version of our original snowman. See it by running
