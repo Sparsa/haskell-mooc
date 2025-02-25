@@ -72,7 +72,10 @@ countValid notes = length [x | x <- notes , valid x  ] where
 --   repeated [1,2,1,2,3,3] ==> Just 3
 
 repeated :: Eq a => [a] -> Maybe a
-repeated = todo
+repeated xs = case xs of
+  [] -> Nothing
+  [x] -> Nothing
+  (x:y:xs') -> if x  /=  y then repeated (y:xs') else Just x
 
 ------------------------------------------------------------------------------
 -- Ex 5: A laboratory has been collecting measurements. Some of the
@@ -94,7 +97,13 @@ repeated = todo
 --     ==> Left "no data"
 
 sumSuccess :: [Either String Int] -> Either String Int
-sumSuccess = todo
+sumSuccess xs = if value == 0 then Left "no data" else Right  value
+  where
+    value = sum (map val xs)
+    val:: Either String Int -> Int
+    val es = case es of
+      Right n -> n
+      Left _ -> 0
 
 ------------------------------------------------------------------------------
 -- Ex 6: A combination lock can either be open or closed. The lock
