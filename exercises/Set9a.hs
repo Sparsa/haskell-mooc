@@ -44,7 +44,9 @@ workload nExercises hoursPerExercise
 -- Hint: use recursion
 
 echo :: String -> String
-echo = todo
+echo str = case str of
+  "" ->  ""
+  otherwise -> str ++", " ++ (echo  (tail str))
 
 ------------------------------------------------------------------------------
 -- Ex 3: A country issues some banknotes. The banknotes have a serial
@@ -57,7 +59,8 @@ echo = todo
 -- are valid.
 
 countValid :: [String] -> Int
-countValid = todo
+countValid notes = length [x | x <- notes , valid x  ] where
+  valid x = length x > 6 && x!!3 == x!!5 && x!!4 == x!!6
 
 ------------------------------------------------------------------------------
 -- Ex 4: Find the first element that repeats two or more times _in a
