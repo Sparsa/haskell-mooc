@@ -60,7 +60,7 @@ echo str = case str of
 
 countValid :: [String] -> Int
 countValid notes = length [x | x <- notes , valid x  ] where
-  valid x = length x > 6 && x!!3 == x!!5 && x!!4 == x!!6
+  valid x = length x > 5 && (x!!2 == x!!4 || x!!3 == x!!5)
 
 ------------------------------------------------------------------------------
 -- Ex 4: Find the first element that repeats two or more times _in a
@@ -97,13 +97,24 @@ repeated xs = case xs of
 --     ==> Left "no data"
 
 sumSuccess :: [Either String Int] -> Either String Int
-sumSuccess xs = if value == 0 then Left "no data" else Right  value
+sumSuccess xs = case value of
+  Nothing -> Left "no data"
+  Just n -> Right n
   where
-    value = sum (map val xs)
-    val:: Either String Int -> Int
+    value = sumMaybe (map val xs)
+    val:: Either String Int -> Maybe Int
     val es = case es of
-      Right n -> n
-      Left _ -> 0
+      Right n -> Just n
+      Left _ -> Nothing
+    sumMaybe :: [Maybe Int] ->  Maybe Int
+    sumMaybe xs = case xs of
+      [] -> Nothing
+      (x:xs') -> case (x,sumMaybe xs') of
+       (Nothing, Nothing) -> Nothing
+       (Nothing, Just n) -> Just n
+       (Just n , Nothing) -> Just n
+       (Just n, Just m) -> Just (m+n)
+
 
 ------------------------------------------------------------------------------
 -- Ex 6: A combination lock can either be open or closed. The lock
@@ -125,30 +136,29 @@ sumSuccess xs = if value == 0 then Left "no data" else Right  value
 --   isOpen (open "0000" (lock (changeCode "0000" (open "1234" aLock)))) ==> True
 --   isOpen (open "1234" (lock (changeCode "0000" (open "1234" aLock)))) ==> False
 
-data Lock = LockUndefined
+data Lock = Lock String  Bool
   deriving Show
 
 -- aLock should be a locked lock with the code "1234"
 aLock :: Lock
-aLock = todo
-
+aLock = Lock "1234" False
 -- isOpen returns True if the lock is open
 isOpen :: Lock -> Bool
-isOpen = todo
+isOpen (Lock _ b ) =  b
 
 -- open tries to open the lock with the given code. If the code is
 -- wrong, nothing happens.
 open :: String -> Lock -> Lock
-open = todo
+open str (Lock s b)= if s == str then (Lock s True) else (Lock s b)
 
 -- lock closes a lock. If the lock is already closed, nothing happens.
 lock :: Lock -> Lock
-lock = todo
+lock (Lock s b) = if b then (Lock s (not b)) else (Lock s b)
 
 -- changeCode changes the code of an open lock. If the lock is closed,
 -- nothing happens.
 changeCode :: String -> Lock -> Lock
-changeCode = todo
+changeCode str (Lock s b) = if b then (Lock str b) else (Lock s b)
 
 ------------------------------------------------------------------------------
 -- Ex 7: Here's a type Text that just wraps a String. Implement an Eq
@@ -165,9 +175,14 @@ changeCode = todo
 
 data Text = Text String
   deriving Show
-
-
-------------------------------------------------------------------------------
+instance Eq Text  where
+  (==) :: Text -> Text  -> Bool
+  (==) (Text x) (Text y) = sx == sy where
+    sx = strip x
+    sy = strip y
+    strip:: String -> String
+    strip xs = [y | y <- xs, not (isSpace y)]
+  ------------------------------------------------------------------------------
 -- Ex 8: We can represent functions or mappings as lists of pairs.
 -- For example the list [("bob",13),("mary",8)] means that "bob" maps
 -- to 13 and "mary" maps to 8.
@@ -199,7 +214,7 @@ data Text = Text String
 --       ==> [("a",1),("b",2)]
 
 compose :: (Eq a, Eq b) => [(a,b)] -> [(b,c)] -> [(a,c)]
-compose = todo
+compose  f s = [(x,y) | (x,z1) <- f, (z,y) <- s, z1 == z ]
 
 ------------------------------------------------------------------------------
 -- Ex 9: Reorder a list using a list of indices.
@@ -243,4 +258,8 @@ multiply :: Permutation -> Permutation -> Permutation
 multiply p q = map (\i -> p !! (q !! i)) (identity (length p))
 
 permute :: Permutation -> [a] -> [a]
-permute = todo
+permute p xs  = map f (identity (length p))
+  where
+    f i = case  lookup i (zip p xs) of
+      Just a -> a
+      Nothing -> ' '
