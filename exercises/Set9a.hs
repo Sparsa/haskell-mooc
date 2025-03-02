@@ -261,5 +261,5 @@ permute :: Permutation -> [a] -> [a]
 permute p xs  = map f (identity (length p))
   where
     f i = case  lookup i (zip p xs) of
-      Just a -> a
-      Nothing -> ' '
+      Just c -> c
+      Nothing -> error "Nothing"
