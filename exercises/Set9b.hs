@@ -47,10 +47,10 @@ type Col   = Int
 type Coord = (Row, Col)
 
 nextRow :: Coord -> Coord
-nextRow (i,j) = todo
+nextRow (i,j) = (i+1,1)
 
 nextCol :: Coord -> Coord
-nextCol (i,j) = todo
+nextCol (i,j) = (i,j+1)
 
 --------------------------------------------------------------------------------
 -- Ex 2: Implement the function prettyPrint that, given the size of
@@ -103,8 +103,21 @@ nextCol (i,j) = todo
 type Size = Int
 
 prettyPrint :: Size -> [Coord] -> String
-prettyPrint = todo
+prettyPrint n xs = addLb n (prettyPrint' xs (take (n*n) (repeat '.')))
+  where
+    prettyPrint' xs' st = case xs' of
+      [] -> st
+      [x] -> addQ x n st
+      (x:xs) -> prettyPrint' xs (addQ x n st )
+addLb :: Size -> String -> String
+addLb n st = if n == 0 then st else
+ (take n st)  ++ "\n" ++ addLb (n-1) (take n (drop n st))
 
+replaceQ :: Int -> Char -> String -> String
+replaceQ n c xs = take n xs ++ [c] ++ drop (n+1) xs
+
+addQ :: Coord -> Int -> String -> String
+addQ (x,y) n xs  = replaceQ ((x-1)*n + y -1) 'Q' xs
 --------------------------------------------------------------------------------
 -- Ex 3: The task in this exercise is to define the relations sameRow, sameCol,
 -- sameDiag, and sameAntidiag that check whether or not two coordinates of the
