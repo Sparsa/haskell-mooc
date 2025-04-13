@@ -107,14 +107,16 @@ prettyPrint n xs = addLb n (prettyPrint' xs (take (n*n) (repeat '.')))
   where
     prettyPrint' xs' st = case xs' of
       [] -> st
-      [x] -> addQ x n st
       (x:xs) -> prettyPrint' xs (addQ x n st )
 addLb :: Size -> String -> String
-addLb n st = if n == 0 then st else
- (take n st)  ++ "\n" ++ addLb (n-1) (take n (drop n st))
+addLb n st = addLb' n  st
+  where
+    addLb' m  st =
+      if m == 0 then st else
+        (take n st)  ++ "\n" ++ addLb' (m-1)  (drop n st)
 
 replaceQ :: Int -> Char -> String -> String
-replaceQ n c xs = take n xs ++ [c] ++ drop (n+1) xs
+replaceQ n c xs = take (n) xs ++ [c] ++ drop (n+1) xs
 
 addQ :: Coord -> Int -> String -> String
 addQ (x,y) n xs  = replaceQ ((x-1)*n + y -1) 'Q' xs
