@@ -107,13 +107,13 @@ prettyPrint n xs = addLb n (prettyPrint' xs (take (n*n) (repeat '.')))
   where
     prettyPrint' xs' st = case xs' of
       [] -> st
-      (x:xs) -> prettyPrint' xs (addQ x n st )
+      (x:xs'') -> prettyPrint' xs'' (addQ x n st )
 addLb :: Size -> String -> String
 addLb n st = addLb' n  st
   where
-    addLb' m  st =
-      if m == 0 then st else
-        (take n st)  ++ "\n" ++ addLb' (m-1)  (drop n st)
+    addLb' m  st' =
+      if m == 0 then st' else
+        (take n st')  ++ "\n" ++ addLb' (m-1)  (drop n st')
 
 replaceQ :: Int -> Char -> String -> String
 replaceQ n c xs = take (n) xs ++ [c] ++ drop (n+1) xs
@@ -142,16 +142,16 @@ addQ (x,y) n xs  = replaceQ ((x-1)*n + y -1) 'Q' xs
 --   sameAntidiag (500,5) (5,500) ==> True
 
 sameRow :: Coord -> Coord -> Bool
-sameRow (i,j) (k,l) = todo
+sameRow (i,j) (k,l) =  i == k
 
 sameCol :: Coord -> Coord -> Bool
-sameCol (i,j) (k,l) = todo
+sameCol (i,j) (k,l) = j == l
 
 sameDiag :: Coord -> Coord -> Bool
-sameDiag (i,j) (k,l) = todo
+sameDiag (i,j) (k,l) = i - k == j - l
 
 sameAntidiag :: Coord -> Coord -> Bool
-sameAntidiag (i,j) (k,l) = todo
+sameAntidiag (i,j) (k,l) = i - k == l - j
 
 --------------------------------------------------------------------------------
 -- Ex 4: In chess, a queen may capture another piece in the same row, column,
@@ -206,7 +206,9 @@ type Candidate = Coord
 type Stack     = [Coord]
 
 danger :: Candidate -> Stack -> Bool
-danger = todo
+danger m [] = False
+danger m (n:ns) = (danger' m n) || (danger m ns)
+  where danger' x n = sameRow x n || sameCol x n || sameDiag x n || sameAntidiag x n
 
 --------------------------------------------------------------------------------
 -- Ex 5: In this exercise, the task is to write a modified version of

@@ -78,8 +78,8 @@ mapMaybe2 f (Just a) (Just b) = Just (f a b)
 
 palindromeHalfs :: [String] -> [String]
 palindromeHalfs xs = map firstHalf (filter palindrome xs)
-
-firstHalf xs = take (div (length xs + 1) 2) xs
+  where
+    firstHalf xs = take (div (length xs + 1) 2) xs
 
 palindrome xs
   | y == 0 || y == 1 = True
