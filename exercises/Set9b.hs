@@ -404,7 +404,11 @@ backtrack (_:xs:xxs) = (nextCol xs : xxs)
 --     step 8 [(6,1),(5,4),(4,2),(3,5),(2,3),(1,1)] ==> [(5,5),(4,2),(3,5),(2,3),(1,1)]
 
 step :: Size -> Stack -> Stack
-step = todo
+step n xs = case ff of
+  Nothing -> backtrack xs
+  Just xs' -> continue  xs'
+  where
+    ff = fixFirst n xs
 
 --------------------------------------------------------------------------------
 -- Ex 9: Let's solve our puzzle! The function finish takes a partial
@@ -419,7 +423,9 @@ step = todo
 -- solve the n queens problem.
 
 finish :: Size -> Stack -> Stack
-finish = todo
+finish n xs
+  | length xs > n = tail xs
+  | otherwise = finish n (step n xs)
 
 solve :: Size -> Stack
 solve n = finish n [(1,1)]
