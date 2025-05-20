@@ -329,10 +329,13 @@ fixFirst n (x:xs)
 -- Hint: Remember nextRow and nextCol? Use them!
 
 continue :: Stack -> Stack
-continue s = todo
+continue []  = [(1,1)]
+continue (x:xs) =  (nextRow x : x : xs )
 
 backtrack :: Stack -> Stack
-backtrack s = todo
+backtrack [] = []
+backtrack [_] = []
+backtrack (_:xs:xxs) = (nextCol xs : xxs)
 
 --------------------------------------------------------------------------------
 -- Ex 8: Let's take a step. Our algorithm solves the problem (in a
