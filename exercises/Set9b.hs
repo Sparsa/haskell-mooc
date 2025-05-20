@@ -103,11 +103,12 @@ nextCol (i,j) = (i,j+1)
 type Size = Int
 
 prettyPrint :: Size -> [Coord] -> String
-prettyPrint n xs = addLb n (prettyPrint' xs (take (n*n) (repeat '.')))
-  where
-    prettyPrint' xs' st = case xs' of
-      [] -> st
-      (x:xs'') -> prettyPrint' xs'' (addQ x n st )
+prettyPrint n xs = addLb n (prettyPrint' n xs (take (n*n) (repeat '.')))
+
+prettyPrint' :: Size -> [Coord] -> String -> String
+prettyPrint' n xs' st = case xs' of
+  [] -> st
+  (x:xs'') -> prettyPrint' n xs'' (addQ x n st )
 addLb :: Size -> String -> String
 addLb n st = addLb' n  st
   where
@@ -243,7 +244,17 @@ danger m (n:ns) = (danger' m n) || (danger m ns)
 -- solution to this version. Any working solution is okay in this exercise.)
 
 prettyPrint2 :: Size -> Stack -> String
-prettyPrint2 = todo
+prettyPrint2 n xs =  addLb n (markDanger n (1,1) xs list)
+  where
+   list = prettyPrint' n xs  (take (n*n) (repeat '.'))
+nextCoord :: Size -> Coord -> Coord
+nextCoord n (x,y) = if y < n then (x,y+1) else (x+1,1)
+markDanger :: Size -> Coord -> Stack -> String -> String
+markDanger n c ql [] = []
+markDanger n c ql (s:ns) = if danger c ql && s /= 'Q' then  "#" ++ list else s: list
+  where
+    list = markDanger n nc ql ns
+    nc = nextCoord n c
 
 --------------------------------------------------------------------------------
 -- Ex 6: Now that we can check if a piece can be safely placed into a square in
