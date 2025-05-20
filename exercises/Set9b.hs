@@ -297,9 +297,17 @@ markDanger n c ql (s:ns) = if danger c ql && s /= 'Q' then  "#" ++ list else s: 
 --     #Q######
 --     ####Q###
 --     Q#######
-
+-- Gurads are like if and else, you put conditions, and write the conditions
+-- then you go for it it is like switch not pattern matchig.
+outOfBoard :: Size -> Coord -> Bool
+outOfBoard n (x,y) = if x > n || y > n then True else False
 fixFirst :: Size -> Stack -> Maybe Stack
-fixFirst n s = todo
+fixFirst _ [] = Nothing
+fixFirst n (x:xs)
+  | outOfBoard n x = Nothing
+  | danger x xs = fixFirst n (nextCol x : xs)
+  | otherwise = Just (x:xs)
+
 
 --------------------------------------------------------------------------------
 -- Ex 7: We need two helper functions for stack management.
