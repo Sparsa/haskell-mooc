@@ -11,6 +11,7 @@ import Data.List
 import qualified Data.Map as Map
 
 import Examples.Bank
+import Data.Maybe (Maybe(Nothing))
 
 
 ------------------------------------------------------------------------------
@@ -47,19 +48,30 @@ readNames s =
 -- (NB! There are obviously other corner cases like the inputs " " and
 -- "a b c", but you don't need to worry about those here)
 split :: String -> Maybe (String,String)
-split = todo
+split s = case s of 
+  [] -> Nothing
+  _  -> let (for,sur) = break isSpace s -- break finds the first space
+        in if null sur
+           then Nothing
+           else Just (for, dropWhile isSpace sur)-- dropping the space 
 
 -- checkNumber should take a pair of two strings and return them
 -- unchanged if they don't contain numbers. Otherwise Nothing is
 -- returned.
 checkNumber :: (String, String) -> Maybe (String, String)
-checkNumber = todo
+checkNumber (a,b)= 
+  if any isDigit a || any isDigit b -- any checks if any charater is digit
+  then Nothing
+  else Just (a,b) 
 
 -- checkCapitals should take a pair of two strings and return them
 -- unchanged if both start with a capital letter. Otherwise Nothing is
 -- returned.
 checkCapitals :: (String, String) -> Maybe (String, String)
-checkCapitals (for,sur) = todo
+checkCapitals (for,sur) = 
+  if isUpper (head for) && isUpper (head sur) -- checking if first character is uppercase
+  then Just (for,sur)
+  else Nothing
 
 ------------------------------------------------------------------------------
 -- Ex 2: Given a list of players and their scores (as [(String,Int)]),
