@@ -12,6 +12,7 @@ import qualified Data.Map as Map
 
 import Examples.Bank
 import Data.Maybe (Maybe(Nothing))
+import System.Console.Terminfo (scrollReverse)
 
 
 ------------------------------------------------------------------------------
@@ -48,7 +49,7 @@ readNames s =
 -- (NB! There are obviously other corner cases like the inputs " " and
 -- "a b c", but you don't need to worry about those here)
 split :: String -> Maybe (String,String)
-split s = case s of 
+split s = case s of
   [] -> Nothing
   _  -> let (for,sur) = break isSpace s -- break finds the first space
         in if null sur
@@ -59,16 +60,16 @@ split s = case s of
 -- unchanged if they don't contain numbers. Otherwise Nothing is
 -- returned.
 checkNumber :: (String, String) -> Maybe (String, String)
-checkNumber (a,b)= 
+checkNumber (a,b)=
   if any isDigit a || any isDigit b -- any checks if any charater is digit
   then Nothing
-  else Just (a,b) 
+  else Just (a,b)
 
 -- checkCapitals should take a pair of two strings and return them
 -- unchanged if both start with a capital letter. Otherwise Nothing is
 -- returned.
 checkCapitals :: (String, String) -> Maybe (String, String)
-checkCapitals (for,sur) = 
+checkCapitals (for,sur) =
   if isUpper (head for) && isUpper (head sur) -- checking if first character is uppercase
   then Just (for,sur)
   else Nothing
@@ -98,7 +99,17 @@ checkCapitals (for,sur) =
 --     ==> Just "a"
 
 winner :: [(String,Int)] -> String -> String -> Maybe String
-winner scores player1 player2 = todo
+winner scores player1 player2 = lookup player1 scores >>= \score1 ->
+  lookup player2 scores >>= \score2 ->
+    if score2 > score1
+      then return player2
+      else return player1
+--winner scores player1 player2 = do
+--  score1 <- lookup player1 scores 
+--  score2 <- lookup player2 scores
+--  if score2 > score1 
+--    then return player2
+--    else return player1
 
 ------------------------------------------------------------------------------
 -- Ex 3: given a list of indices and a list of values, return the sum
@@ -114,9 +125,16 @@ winner scores player1 player2 = todo
 --    Just 19
 --  selectSum [0..10] [4,6,9,20]
 --    Nothing
-
+safeIndex :: [a] -> Int -> Maybe a
+safeIndex xs i 
+  | i < 0 || i >= length xs = Nothing
+  | otherwise = Just (xs !! i)
 selectSum :: Num a => [a] -> [Int] -> Maybe a
-selectSum xs is = todo
+selectSum xs is = case is of 
+  [] ->  Just 0
+  (x:xs') -> safeIndex xs x >>= \v -> 
+    selectSum xs xs' >>= \v' -> 
+      return (v + v') 
 
 ------------------------------------------------------------------------------
 -- Ex 4: Here is the Logger monad from the course material. Implement
